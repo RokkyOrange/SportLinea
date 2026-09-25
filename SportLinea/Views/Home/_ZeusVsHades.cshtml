@@ -1,0 +1,122 @@
+@model HomeViewModel
+@using SportLinea.Models
+@{
+    var defaultStake = ZeusVsHadesConfig.GetDefaultStake(Model.PlayerBalance ?? 0);
+}
+
+<section class="zeus-hades-section mt-4">
+    <div class="zeus-hades-header">
+        <h2 class="section-title mb-1">⚡ Zeus vs Hades</h2>
+        <p class="zeus-hades-subtitle">Сетка 5×5. Откройте огонь у строк и молнии у столбцов — на пересечениях символы умножаются на ×0…×18. Теоретический макс. ~5000× ставки!</p>
+        <div class="mt-3">
+            <partial name="_RefreshLineForm" view-data='new ViewDataDictionary(ViewData) { { "ReturnHome", true }, { "ButtonClass", "btn btn-outline-light" } }' />
+        </div>
+    </div>
+
+    <div class="row align-items-start justify-content-center">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+            <div id="zeusGamePanel" class="zeus-game-panel">
+                <div class="zeus-grid-wrap">
+                    <div class="zeus-board-layout" id="zeusBoard">
+                        <div class="zeus-board-line zeus-board-line-head">
+                            <div class="zeus-board-gap" aria-hidden="true"></div>
+                            @for (var c = 0; c < ZeusVsHadesConfig.GridSize; c++)
+                            {
+                                <button type="button"
+                                        class="zeus-line-btn zeus-col-btn"
+                                        data-is-row="false"
+                                        data-index="@c"
+                                        disabled>
+                                    <span class="zeus-line-icon" aria-hidden="true">⚡</span>
+                                    <span class="zeus-line-value" hidden></span>
+                                </button>
+                            }
+                        </div>
+                        @for (var r = 0; r < ZeusVsHadesConfig.GridSize; r++)
+                        {
+                            <div class="zeus-board-line">
+                                <button type="button"
+                                        class="zeus-line-btn zeus-row-btn"
+                                        data-is-row="true"
+                                        data-index="@r"
+                                        disabled>
+                                    <span class="zeus-line-icon" aria-hidden="true">🔥</span>
+                                    <span class="zeus-line-value" hidden></span>
+                                </button>
+                                @for (var c = 0; c < ZeusVsHadesConfig.GridSize; c++)
+                                {
+                                    <div class="zeus-cell" data-row="@r" data-col="@c">
+                                        <span class="zeus-cell-emoji">?</span>
+                                        <span class="zeus-cell-hit" hidden></span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div id="zeusConfrontationBanner" class="zeus-confrontation-banner" hidden>
+                <span class="zeus-confrontation-title">⚔ Confrontation</span>
+                <span id="zeusConfrontationProgress">Раунд 0/3</span>
+            </div>
+            @if (User.IsInRole(Roles.Player))
+            {
+                <div class="slot-play-dock">
+                    <button type="button" class="btn btn-primary btn-lg w-100" id="zeusSpinBtn">⚡ Крутить!</button>
+                    <button type="button" class="btn btn-warning btn-lg w-100 mt-2" id="zeusCollectBtn" style="display:none">Собрать выигрыш</button>
+                    <div id="zeusResult" class="roulette-result mt-3 slot-payout-box">Выплата: —</div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-panel zeus-panel">
+                <h4 id="zeusPanelTitle">Олимп vs Подземелье</h4>
+                <p id="zeusPanelDesc" style="color: var(--color-text-muted); font-size: 0.9rem">
+                    Выберите ставку и крутите. Откройте все 10 символов линий, чтобы собрать выигрыш.
+                </p>
+
+                @if (User.IsInRole(Roles.Player))
+                {
+                    <p class="mb-2">Баланс: <strong id="zeusBalance" data-casino-balance style="color: var(--color-accent)">@(Model.PlayerBalance?.ToString("N2") ?? "0") ₽</strong></p>
+
+                    <form id="zeusForm"
+                          data-spin-url="@Url.Action("Spin", "ZeusHades")"
+                          data-reveal-url="@Url.Action("Reveal", "ZeusHades")"
+                          data-complete-url="@Url.Action("Complete", "ZeusHades")"
+                          data-confrontation-url="@Url.Action("Confrontation", "ZeusHades")">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3" id="zeusStakeGroup">
+                            <label class="form-label">Сумма ставки</label>
+                            <input type="hidden" name="amount" id="zeusAmount" value="@((int)defaultStake)" />
+                            <div class="roulette-stake-options" id="zeusStakeOptions">
+                                @foreach (var stake in ZeusVsHadesConfig.AllowedStakes)
+                                {
+                                    var affordable = (Model.PlayerBalance ?? 0) >= stake;
+                                    <button type="button"
+                                            class="roulette-stake-chip zeus-stake-chip@(stake == defaultStake ? " active" : "")@(affordable ? "" : " disabled")"
+                                            data-amount="@((int)stake)"
+                                            @(affordable ? "" : "disabled")>
+                                        @stake.ToString("N0") ₽
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-3" id="zeusTurboGroup">
+                            <input class="form-check-input" type="checkbox" id="zeusTurboToggle" role="switch">
+                            <label class="form-check-label" for="zeusTurboToggle">Включить турбо</label>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <p style="color: var(--color-text-muted)">Войдите как игрок, чтобы играть</p>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary me-2">Войти</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

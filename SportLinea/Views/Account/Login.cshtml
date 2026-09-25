@@ -1,0 +1,65 @@
+@model LoginViewModel
+@using SportLinea.Models.ViewModels
+@{
+    ViewData["Title"] = "Вход";
+    var blocked = ViewBag.BlockedAccount as BlockedAccountInfoViewModel;
+}
+
+<h1 class="page-title">Вход в систему</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        @if (blocked != null)
+        {
+            <div class="card-panel mb-3" style="border: 1px solid var(--color-danger, #dc3545);">
+                <h2 class="h5 mb-3" style="color: #f87171;">Аккаунт заблокирован</h2>
+                <p class="mb-2">Ваш аккаунт заблокирован и вход в систему невозможен.</p>
+                <p class="mb-2"><strong>Причина:</strong> @blocked.Reason</p>
+                <p class="mb-0">
+                    Для обжалования решения свяжитесь с
+                    <strong>@blocked.BookmakerName</strong>:
+                    <a href="mailto:@blocked.BookmakerEmail" style="color: var(--color-accent)">@blocked.BookmakerEmail</a>
+                </p>
+            </div>
+        }
+
+        <div class="card-panel">
+            <form asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-validation"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-validation"></span>
+                </div>
+                <div class="mb-3 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                @if (blocked != null)
+                {
+                    <button type="submit" class="btn btn-primary w-100" disabled>Войти</button>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                }
+            </form>
+            <p class="mt-3 text-center" style="color: var(--color-text-muted)">
+                Нет аккаунта? <a asp-action="Register" style="color: var(--color-accent)">Зарегистрироваться</a>
+            </p>
+            <small style="color: var(--color-text-muted)">
+                Тестовый игрок: player@sportlinea.ru / Player123!
+            </small>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

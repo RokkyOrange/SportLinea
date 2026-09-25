@@ -1,0 +1,120 @@
+@model List<Bonus>
+@using SportLinea.Models
+@{
+    ViewData["Title"] = "Бонусы";
+    var crazyTimeAllowed = ViewBag.CrazyTimeAllowed as bool? ?? true;    string StatusLabel(BonusStatus status) => status switch
+    {
+        BonusStatus.Pending => "Ожидает активации",
+        BonusStatus.Active => "Активен",
+        BonusStatus.Used => "Использован",
+        BonusStatus.Expired => "Истёк",
+        _ => status.ToString()
+    };
+}
+
+<h1 class="page-title">Бонусы и акции</h1>
+
+<div class="card-panel mb-3">
+    <p class="mb-2" style="color: var(--color-text-muted); font-size: 0.9rem">
+        <strong>Бонус за регистрацию:</strong> фрибет @BonusRules.RegistrationFreeBetAmount.ToString("N0") ₽
+        @if (crazyTimeAllowed)
+        {
+            <text>и @BonusRules.RegistrationFreeSpinCount фриспинов Crazy Time по @BonusRules.RegistrationFreeSpinAmount.ToString("N0") ₽.</text>
+        }
+        else
+        {
+            <text>(фриспины Crazy Time — только для резидентов США).</text>
+        }
+    </p>
+    @if (crazyTimeAllowed)
+    {
+    <p class="mb-2" style="color: var(--color-text-muted); font-size: 0.9rem">
+        <strong>Автоматические бонусы:</strong> за каждые @BonusRules.BetsPerFreeBet ставок — фрибет @BonusRules.FreeBetAmount.ToString("N0") ₽ на любое событие;
+        за каждые @BonusRules.SpinsPerRouletteBonus спинов Crazy Time — @BonusRules.FreeRouletteSpinCount бесплатных спинов по @BonusRules.FreeRouletteSpinAmount.ToString("N0") ₽;
+        за каждые @BonusRules.BountyGamesPerPlinkoBonus бонусных игр Bingo Plinko — бесплатная Bounty Hunter по @BonusRules.FreePlinkoBountyStake.ToString("N0") ₽ (номинал @BonusRules.FreePlinkoBountyValue.ToString("N0") ₽).
+    </p>
+    }
+    <p class="mb-0" style="color: var(--color-text-muted); font-size: 0.875rem">
+        До следующего фрибета: <strong>@ViewBag.BetsUntilNextBonus</strong> ставок
+        @if (crazyTimeAllowed)
+        {
+            <text>· До следующих бесплатных спинов: <strong>@ViewBag.SpinsUntilNextBonus</strong> спинов · До бесплатной Bounty Hunter: <strong>@ViewBag.BountyGamesUntilNextBonus</strong> бонусных игр</text>
+        }
+    </p>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card-panel text-center">
+        <p style="color: var(--color-text-muted)">У вас пока нет бонусов. Делайте ставки и крутите Crazy Time!</p>
+    </div>
+}
+else
+{
+    @foreach (var b in Model)
+    {
+        <div class="card-panel mb-2">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                <div>
+                    <strong>@b.Description</strong>
+                    <div style="color: var(--color-text-muted); font-size: 0.875rem">
+                        @b.StartDate.ToLocalTime().ToString("dd.MM.yyyy") — @b.EndDate.ToLocalTime().ToString("dd.MM.yyyy")
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(b.BookmakerComment))
+                    {
+                        <div style="color: var(--color-text-muted); font-size: 0.875rem; margin-top: 0.25rem">
+                            Комментарий букмекера: @b.BookmakerComment
+                        </div>
+                    }
+                    @if (b.Type == BonusType.FreeRouletteSpins && b.Status == BonusStatus.Active)
+                    {
+                        <div style="color: var(--color-accent); font-size: 0.875rem">
+                            Осталось спинов: @b.UsesRemaining из @b.UsesTotal
+                        </div>
+                    }
+                    @if (b.Type == BonusType.FreePlinkoBounty && b.Status == BonusStatus.Active)
+                    {
+                        <div style="color: var(--color-accent); font-size: 0.875rem">
+                            Бесплатная Bounty Hunter готова к использованию
+                        </div>
+                    }
+                </div>
+                <div class="text-end">
+                    <div style="color: var(--color-accent); font-weight: 700; font-size: 1.2rem">
+                        @(b.Type == BonusType.FreeRouletteSpins ? $"{b.Amount:N0} ₽ × {b.UsesTotal}" :
+                          b.Type == BonusType.FreePlinkoBounty ? $"{b.Amount:N0} ₽ (номинал {BonusRules.FreePlinkoBountyValue:N0} ₽)" :
+                          $"{b.Amount:N0} ₽")
+                    </div>
+                    <span class="badge @(b.Status == BonusStatus.Active || b.Status == BonusStatus.Pending ? "badge-won" : "badge-lost")">
+                        @StatusLabel(b.Status)
+                    </span>
+                    @if (b.Status == BonusStatus.Pending && b.Type != BonusType.Manual && b.EndDate >= DateTime.UtcNow)
+                    {
+                        @if (b.Type == BonusType.FreeRouletteSpins && !crazyTimeAllowed)
+                        {
+                            <p class="mt-2 mb-0" style="color: var(--color-text-muted); font-size: 0.8rem">
+                                Недоступно в вашей стране проживания
+                            </p>
+                        }
+                        else if (b.Type == BonusType.FreePlinkoBounty && !crazyTimeAllowed)
+                        {
+                            <p class="mt-2 mb-0" style="color: var(--color-text-muted); font-size: 0.8rem">
+                                Недоступно в вашей стране проживания
+                            </p>
+                        }
+                        else
+                        {
+                            <form asp-action="ActivateBonus" method="post" class="mt-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="btn btn-primary btn-sm">Активировать</button>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<a asp-action="Index" class="btn btn-outline-light mt-3">← Назад</a>

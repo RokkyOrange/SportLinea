@@ -1,0 +1,38 @@
+@model SetResultViewModel
+@{
+    ViewData["Title"] = "Ввод результата";
+    var coefficients = ViewBag.Coefficients as List<Coefficient> ?? new();
+}
+
+<h1 class="page-title">Ввод результата</h1>
+<p style="color: var(--color-text-muted)">Событие: <strong>@Model.EventTitle</strong></p>
+
+<div class="card-panel">
+    <form asp-action="SetResult" method="post" onsubmit="return confirm('Подтвердите ввод результата. Все ставки будут пересчитаны.')">
+        <input type="hidden" asp-for="SportEventId" />
+        <input type="hidden" asp-for="EventTitle" />
+        <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+        <div class="mb-3">
+            <label asp-for="Result" class="form-label"></label>
+            <input asp-for="Result" class="form-control" placeholder="Например: 2:1" />
+            <span asp-validation-for="Result" class="text-validation"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="WinningCoefficientId" class="form-label"></label>
+            <select asp-for="WinningCoefficientId" class="form-select">
+                <option value="">— Выберите исход —</option>
+                @foreach (var c in coefficients)
+                {
+                    <option value="@c.Id">@c.OutcomeDescription (@c.Value)</option>
+                }
+            </select>
+            <span asp-validation-for="WinningCoefficientId" class="text-validation"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Рассчитать ставки</button>
+        <a asp-action="Events" class="btn btn-outline-light">Отмена</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

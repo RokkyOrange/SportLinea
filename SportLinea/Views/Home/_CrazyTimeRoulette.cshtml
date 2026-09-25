@@ -1,0 +1,248 @@
+@model HomeViewModel
+
+@using SportLinea.Models
+
+@{
+
+    var wheelGradient = string.Join(", ",
+
+        CrazyTimeWheel.Segments.Select((s, i) => $"{s.Color} {i * 45}deg {(i + 1) * 45}deg"));
+
+    var crazyBonusGradient = string.Join(", ",
+
+        CrazyTimeWheel.CrazyBonusSegments.Select((s, i) => $"{s.Color} {i * 180}deg {(i + 1) * 180}deg"));
+
+    var hotSpinsGradient = string.Join(", ",
+
+        CrazyTimeWheel.HotSpinsSegments.Select((s, i) => $"{s.Color} {i * 90}deg {(i + 1) * 90}deg"));
+
+    var defaultStake = CrazyTimeWheel.GetDefaultStake(Model.PlayerBalance ?? 0);
+
+}
+
+
+
+<section class="crazy-time-section">
+
+    <div class="crazy-time-header">
+
+        <h2 class="section-title mb-1">🎡 Crazy Time</h2>
+
+        <p class="crazy-time-subtitle">Спортивная линия обновляется — пока крутите рулетку и испытайте удачу!</p>
+
+        <div class="mt-3">
+
+            <partial name="_RefreshLineForm" view-data='new ViewDataDictionary(ViewData) { { "ReturnHome", true }, { "ButtonClass", "btn btn-outline-light" } }' />
+
+        </div>
+
+    </div>
+
+
+
+    <div class="row align-items-center justify-content-center">
+
+        <div class="col-lg-6 text-center mb-4 mb-lg-0">
+
+            <div class="wheel-container" id="mainWheelWrap">
+
+                <div class="wheel-pointer">▼</div>
+
+                <div class="wheel wheel-main" id="crazyWheel"
+
+                     style="background: conic-gradient(from -22.5deg, @wheelGradient);">
+
+                    @for (var i = 0; i < CrazyTimeWheel.Segments.Length; i++)
+
+                    {
+
+                        var seg = CrazyTimeWheel.Segments[i];
+
+                        <div class="wheel-label" style="--i: @i">
+
+                            <span>@seg.Label</span>
+
+                        </div>
+
+                    }
+
+                </div>
+
+                <div class="wheel-center">CT</div>
+
+            </div>
+
+
+
+            <div class="wheel-container bonus-wheel-wrap" id="crazyBonusWheelWrap" style="display:none">
+
+                <div class="wheel-pointer">▼</div>
+
+                <div class="wheel wheel-bonus" id="crazyBonusWheel"
+
+                     style="background: conic-gradient(from -90deg, @crazyBonusGradient);">
+
+                    @for (var i = 0; i < CrazyTimeWheel.CrazyBonusSegments.Length; i++)
+
+                    {
+
+                        var seg = CrazyTimeWheel.CrazyBonusSegments[i];
+
+                        <div class="wheel-label" style="--i: @i">
+
+                            <span>@seg.Label</span>
+
+                        </div>
+
+                    }
+
+                </div>
+
+                <div class="wheel-center bonus-center">🎰</div>
+
+            </div>
+
+
+
+            <div class="wheel-container bonus-wheel-wrap" id="hotSpinsWheelWrap" style="display:none">
+
+                <div class="wheel-pointer">▼</div>
+
+                <div class="wheel wheel-hotspins" id="hotSpinsWheel"
+
+                     style="background: conic-gradient(from -45deg, @hotSpinsGradient);">
+
+                    @for (var i = 0; i < CrazyTimeWheel.HotSpinsSegments.Length; i++)
+
+                    {
+
+                        var seg = CrazyTimeWheel.HotSpinsSegments[i];
+
+                        <div class="wheel-label wheel-label-4" style="--i: @i">
+
+                            <span>@seg.Label</span>
+
+                        </div>
+
+                    }
+
+                </div>
+
+                <div class="wheel-center bonus-center hotspins-center">🔥</div>
+
+            </div>
+
+            @if (User.IsInRole(Roles.Player))
+            {
+                <div class="slot-play-dock">
+                    <button type="submit" form="rouletteForm" class="btn btn-primary btn-lg w-100 crazy-spin-btn" id="spinBtn">
+                        🎰 Крутить!
+                    </button>
+                    <button type="button" class="btn btn-danger btn-lg w-100 crazy-spin-btn mt-2" id="bonusSpinBtn" style="display:none">
+                        🔥 Крутить бонус!
+                    </button>
+                    <div id="rouletteResult" class="roulette-result mt-3 slot-payout-box">Выплата: —</div>
+                </div>
+            }
+
+        </div>
+
+
+
+        <div class="col-lg-5">
+
+            <div class="card-panel crazy-panel">
+
+                <h4 id="panelTitle">Испытайте удачу</h4>
+
+                <p id="panelDesc" style="color: var(--color-text-muted); font-size: 0.9rem">
+
+                    Сектора: много ×0, ×2, максимум ×3. HOT SPINS и CRAZY — бонусные игры!
+
+                </p>
+
+
+
+                @if (User.IsInRole(Roles.Player))
+
+                {
+
+                    <p class="mb-2">Баланс: <strong id="rouletteBalance" data-casino-balance style="color: var(--color-accent)">@(Model.PlayerBalance?.ToString("N2") ?? "0") ₽</strong></p>
+
+                    <form id="rouletteForm" asp-controller="Roulette" asp-action="Spin" method="post"
+                          data-bonus-url="@Url.Action("BonusSpin", "Roulette")"
+                          data-buy-bonus-url="@Url.Action("BuyBonus", "Roulette")"
+                          data-state-url="@Url.Action("State", "Roulette")"
+                          data-buy-multiplier="@CrazyTimeWheel.BonusBuyPriceMultiplier"
+                          data-free-spin-amount="@((int)Model.FreeRouletteSpinAmount)">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3" id="betAmountGroup">
+                            <label class="form-label">Сумма ставки</label>
+                            <input type="hidden" name="amount" id="rouletteAmount" value="@((int)defaultStake)" />
+                            <div class="roulette-stake-options" id="rouletteStakeOptions">
+                                @foreach (var stake in CrazyTimeWheel.AllowedStakes)
+                                {
+                                    var affordable = (Model.PlayerBalance ?? 0) >= stake;
+                                    <button type="button"
+                                            class="roulette-stake-chip@(stake == defaultStake ? " active" : "")@(affordable ? "" : " disabled")"
+                                            data-amount="@((int)stake)"
+                                            @(affordable ? "" : "disabled")>
+                                        @stake.ToString("N0") ₽
+                                    </button>
+                                }
+                            </div>
+                            @if (Model.FreeRouletteSpinsRemaining > 0)
+                            {
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" name="useFreeSpin" id="useFreeSpin" value="true" />
+                                    <label class="form-check-label" for="useFreeSpin" style="color: var(--color-accent)">
+                                        Бесплатный спин @Model.FreeRouletteSpinAmount.ToString("N0") ₽ (осталось: @Model.FreeRouletteSpinsRemaining)
+                                    </label>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="roulette-buy-section mb-3" id="buyBonusGroup">
+                            <div class="roulette-buy-section-title">Купить бонус сразу <span class="roulette-buy-hint">×@CrazyTimeWheel.BonusBuyPriceMultiplier от ставки</span></div>
+                            <div class="roulette-buy-options">
+                                <button type="button" class="roulette-buy-card" id="buyHotSpinsBtn" data-bonus-kind="hotspins">
+                                    <span class="roulette-buy-icon">🔥</span>
+                                    <span class="roulette-buy-name">HOT SPINS</span>
+                                    <span class="roulette-buy-price" id="buyHotSpinsPrice">—</span>
+                                </button>
+                                <button type="button" class="roulette-buy-card" id="buyCrazyBtn" data-bonus-kind="crazy">
+                                    <span class="roulette-buy-icon">🎰</span>
+                                    <span class="roulette-buy-name">CRAZY</span>
+                                    <span class="roulette-buy-price" id="buyCrazyPrice">—</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                }
+
+                else
+
+                {
+
+                    <div class="text-center py-3">
+
+                        <p style="color: var(--color-text-muted)">Войдите как игрок, чтобы крутить рулетку</p>
+
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary me-2">Войти</a>
+
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light">Регистрация</a>
+
+                    </div>
+
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+

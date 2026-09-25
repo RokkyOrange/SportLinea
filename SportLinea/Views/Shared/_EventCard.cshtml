@@ -1,0 +1,17 @@
+@model SportEvent
+
+<div class="event-card h-100">
+    <span class="event-sport">@Model.SportType</span>
+    <span class="badge badge-pending ms-1" style="font-size: 0.7rem">@Model.SportCategory</span>
+    <div class="event-title">@Model.Title</div>
+    <div class="event-date">@Model.StartDate.ToString("dd.MM.yyyy HH:mm")</div>
+    <div class="coefficients">
+        @foreach (var c in Model.Coefficients)
+        {
+            <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.Id" class="coef-btn">
+                <span>@c.OutcomeDescription</span>
+                <span class="coef-value">@c.Value.ToString("F2")</span>
+            </a>
+        }
+    </div>
+</div>

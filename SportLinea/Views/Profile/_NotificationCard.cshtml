@@ -1,0 +1,43 @@
+@model Notification
+
+@{
+    var cssClass = Model.Type switch
+    {
+        NotificationType.BetLoss => "notification-loss",
+        NotificationType.BetWin => "notification-win",
+        NotificationType.Bonus => "notification-bonus",
+        NotificationType.WithdrawalPending => "notification-warning",
+        NotificationType.WithdrawalApproved => "notification-win",
+        NotificationType.WithdrawalRejected => "notification-loss",
+        NotificationType.BalanceReset => "notification-loss",
+        NotificationType.BalanceDeposit => "notification-win",
+        NotificationType.WithdrawalAccepted => "notification-win",
+        NotificationType.BetResult when Model.Text.Contains("проиграла", StringComparison.OrdinalIgnoreCase) => "notification-loss",
+        NotificationType.BetResult when Model.Text.Contains("выиграла", StringComparison.OrdinalIgnoreCase) => "notification-win",
+        _ => ""
+    };
+
+    var typeLabel = Model.Type switch
+    {
+        NotificationType.BetLoss => "Проигрыш",
+        NotificationType.BetWin => "Выигрыш",
+        NotificationType.Bonus => "Бонус",
+        NotificationType.WithdrawalPending => "Вывод на проверке",
+        NotificationType.WithdrawalApproved => "Вывод подтверждён",
+        NotificationType.WithdrawalRejected => "Вывод отклонён",
+        NotificationType.BalanceReset => "Обнуление счёта",
+        NotificationType.BalanceDeposit => "Пополнение баланса",
+        NotificationType.WithdrawalAccepted => "Вывод средств",
+        NotificationType.BetResult => "Ставка",
+        NotificationType.Registration => "Регистрация",
+        _ => "Инфо"
+    };
+}
+
+<div class="card-panel mb-2 notification-card @cssClass">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-1">
+        <span class="notification-type-badge">@typeLabel</span>
+        <small class="notification-time">@Model.SentAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</small>
+    </div>
+    <p class="mb-0 mt-2 notification-text">@Model.Text</p>
+</div>

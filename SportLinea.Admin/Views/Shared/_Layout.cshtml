@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1280" />
+    <title>@ViewData["Title"] — АРМ «СпортЛиния»</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        body { min-width: 1100px; }
+        .admin-shell { max-width: 1320px; }
+        .navbar-toggler { display: none !important; }
+        .navbar-collapse { display: flex !important; }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar navbar-expand">
+            <div class="container admin-shell">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    АРМ <span class="brand-accent">СпортЛиния</span>
+                </a>
+                <ul class="navbar-nav me-auto">
+                    @if (User.IsInRole(Roles.Bookmaker) || User.IsInRole(Roles.SuperUser))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Bookmaker" asp-action="Index">Панель букмекера</a></li>
+                    }
+                    @if (User.IsInRole(Roles.SuperUser))
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Admin" asp-action="Index">Администрирование</a></li>
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <li class="nav-item"><span class="nav-link user-info">@User.Identity.Name</span></li>
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-light btn-sm">Выход</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">Вход</a></li>
+                    }
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="site-main">
+        <div class="container admin-shell">
+            @await Html.PartialAsync("_FlashAlerts")
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container admin-shell text-center">
+            <p class="mb-0">&copy; 2026 БК «СпортЛиния» — административное АРМ (ПК)</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Панель букмекера";
+}
+
+<h1 class="page-title">Панель букмекера</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-value">@ViewBag.EventsCount</div>
+            <div class="stat-label">Активных событий</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-value">@ViewBag.BetsCount</div>
+            <div class="stat-label">Ставок в ожидании</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-value">@ViewBag.PlayersCount</div>
+            <div class="stat-label">Игроков</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3"><a asp-action="Events" class="btn btn-primary w-100 py-3">Управление событиями</a></div>
+    <div class="col-md-4 mb-3"><a asp-action="CreateEvent" class="btn btn-outline-light w-100 py-3">Создать событие</a></div>
+    <div class="col-md-4 mb-3"><a asp-action="Bets" class="btn btn-outline-light w-100 py-3">Реестр ставок</a></div>
+    <div class="col-md-4 mb-3"><a asp-action="Players" class="btn btn-outline-light w-100 py-3">Управление игроками</a></div>
+    <div class="col-md-4 mb-3">
+        <a asp-action="Withdrawals" class="btn btn-outline-light w-100 py-3 position-relative">
+            Заявки на вывод
+            @if (ViewBag.PendingWithdrawalsCount is int pendingCount && pendingCount > 0)
+            {
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">@pendingCount</span>
+            }
+        </a>
+    </div>
+    <div class="col-md-4 mb-3"><a asp-action="Reports" class="btn btn-outline-light w-100 py-3">Отчёт по событиям</a></div>
+    <div class="col-md-4 mb-3"><a asp-action="ExportBets" class="btn btn-outline-light w-100 py-3">Экспорт в Excel</a></div>
+</div>

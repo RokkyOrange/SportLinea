@@ -1,0 +1,69 @@
+@{
+
+    ViewData["Title"] = "Администрирование";
+
+}
+
+
+
+<h1 class="page-title">Панель суперпользователя</h1>
+
+
+
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+
+        <div class="card-panel text-center">
+
+            <h5>Букмекеры</h5>
+
+            <p style="color: var(--color-text-muted)">Список учётных записей и блокировка</p>
+
+            <a asp-action="Bookmakers" class="btn btn-primary">Список букмекеров</a>
+
+            <a asp-action="CreateBookmaker" class="btn btn-outline-light ms-1">Создать</a>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4 mb-3">
+
+        <div class="card-panel text-center">
+
+            <h5>Журнал действий</h5>
+
+            <p style="color: var(--color-text-muted)">Лог действий пользователей системы</p>
+
+            <a asp-action="ActionLog" class="btn btn-primary">Просмотреть журнал</a>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4 mb-3">
+
+        <div class="card-panel text-center">
+
+            <h5>Резервное копирование</h5>
+
+            <p style="color: var(--color-text-muted)">Создание и просмотр резервных копий БД</p>
+
+            <form asp-action="Backup" method="post" class="d-inline">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit" class="btn btn-primary">Создать копию</button>
+
+            </form>
+
+            <a asp-action="Backups" class="btn btn-outline-light ms-1">Список</a>
+
+        </div>
+
+    </div>
+
+</div>
+
+

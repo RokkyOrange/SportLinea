@@ -1,0 +1,84 @@
+@model ApplicationUser
+@using SportLinea.Models
+@{
+    ViewData["Title"] = "Личный кабинет";
+    var stats = ViewBag.Stats as PlayerStatsViewModel;
+    var notifications = ViewBag.Notifications as List<Notification> ?? new();
+}
+
+<h1 class="page-title">Личный кабинет</h1>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card-panel wallet-balance-card text-center">
+            <div class="stat-label">Баланс счёта</div>
+            <div class="balance-display">@Model.Balance.ToString("N2") ₽</div>
+            <div class="wallet-actions">
+                <a asp-action="Deposit" class="btn btn-primary wallet-action-btn">
+                    <span class="wallet-action-icon">+</span> Пополнить
+                </a>
+                <a asp-action="Withdraw" class="btn btn-outline-light wallet-action-btn">
+                    <span class="wallet-action-icon">↓</span> Вывести
+                </a>
+            </div>
+            @if (Model.Balance < WithdrawRules.MinAmount)
+            {
+                <p class="wallet-hint mb-0">Вывод от @WithdrawRules.MinAmount.ToString("N0") ₽</p>
+            }
+        </div>
+    </div>
+    @if (stats != null)
+    {
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-6 col-md mb-2">
+                    <div class="stat-card"><div class="stat-value">@stats.TotalBets</div><div class="stat-label">Всего ставок</div></div>
+                </div>
+                <div class="col-6 col-md mb-2">
+                    <div class="stat-card"><div class="stat-value" style="color:#f39c12">@stats.Pending</div><div class="stat-label">В ожидании</div></div>
+                </div>
+                <div class="col-6 col-md mb-2">
+                    <div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@stats.Wins</div><div class="stat-label">Побед</div></div>
+                </div>
+                <div class="col-6 col-md mb-2">
+                    <div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@stats.Losses</div><div class="stat-label">Поражений</div></div>
+                </div>
+                <div class="col-6 col-md mb-2">
+                    <div class="stat-card"><div class="stat-value">@stats.TotalWinnings.ToString("N0")</div><div class="stat-label">Выигрыш ₽</div></div>
+                </div>
+            </div>
+            @if (stats.Pending > 0)
+            {
+                <p class="mt-2 mb-0" style="color: var(--color-text-muted); font-size: 0.875rem">
+                    Ставки в ожидании появляются, если матч ещё не рассчитан.
+                </p>
+            }
+        </div>
+    }
+</div>
+
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item"><a class="nav-link active" asp-action="Index">Обзор</a></li>
+    <li class="nav-item"><a class="nav-link" asp-controller="Bets" asp-action="History">История ставок</a></li>
+    <li class="nav-item"><a class="nav-link" asp-action="Stats">Статистика</a></li>
+    <li class="nav-item"><a class="nav-link" asp-action="Bonuses">Бонусы</a></li>
+    <li class="nav-item"><a class="nav-link" asp-action="Notifications">Уведомления</a></li>
+    <li class="nav-item"><a class="nav-link" asp-action="Edit">Профиль</a></li>
+</ul>
+
+<div class="card-panel">
+    <h5>Данные профиля</h5>
+    <p><strong>ФИО:</strong> @Model.FullName</p>
+    <p><strong>Email:</strong> @Model.Email</p>
+    <p><strong>Страна проживания:</strong> @CountryPolicy.GetDisplayName(Model.CountryOfResidence)</p>
+    <p><strong>Дата регистрации:</strong> @Model.RegistrationDate.ToLocalTime().ToString("dd.MM.yyyy")</p>
+</div>
+
+@if (notifications.Any())
+{
+    <h2 class="section-title">Последние уведомления</h2>
+    @foreach (var n in notifications)
+    {
+        <partial name="_NotificationCard" model="n" />
+    }
+}

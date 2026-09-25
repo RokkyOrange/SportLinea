@@ -1,0 +1,84 @@
+@model AssignBonusViewModel
+@{
+    ViewData["Title"] = "Назначение бонуса";
+}
+
+<h1 class="page-title">Назначить бонус: @Model.PlayerName</h1>
+
+<div class="card-panel">
+    <form asp-action="AssignBonus" method="post" id="assignBonusForm">
+        <input type="hidden" asp-for="PlayerId" />
+        <input type="hidden" asp-for="PlayerName" />
+        <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+
+        <div class="mb-3">
+            <label class="form-label">Тип бонуса</label>
+            <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                    <input class="form-check-input bonus-kind" type="radio" asp-for="BonusKind" value="@BookmakerBonusKind.FreeBet" id="kindFreeBet" />
+                    <label class="form-check-label" for="kindFreeBet">Фрибет</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input bonus-kind" type="radio" asp-for="BonusKind" value="@BookmakerBonusKind.FreeRouletteSpins" id="kindSpins" />
+                    <label class="form-check-label" for="kindSpins">Фриспины Crazy Time</label>
+                </div>
+            </div>
+        </div>
+
+        <div id="freeBetFields" class="mb-3">
+            <label asp-for="FreeBetAmount" class="form-label"></label>
+            <input asp-for="FreeBetAmount" class="form-control" type="number" min="1" step="1" />
+            <span asp-validation-for="FreeBetAmount" class="text-validation"></span>
+        </div>
+
+        <div id="spinFields" class="mb-3" style="display: none;">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="SpinCount" class="form-label"></label>
+                    <input asp-for="SpinCount" class="form-control" type="number" min="1" step="1" />
+                    <span asp-validation-for="SpinCount" class="text-validation"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SpinAmount" class="form-label"></label>
+                    <input asp-for="SpinAmount" class="form-control" type="number" min="1" step="1" />
+                    <span asp-validation-for="SpinAmount" class="text-validation"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="BookmakerComment" class="form-label"></label>
+            <textarea asp-for="BookmakerComment" class="form-control" rows="2" placeholder="Необязательный комментарий для игрока"></textarea>
+            <span asp-validation-for="BookmakerComment" class="text-validation"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EndDate" class="form-label"></label>
+            <input asp-for="EndDate" class="form-control" type="date" />
+            <span asp-validation-for="EndDate" class="text-validation"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Назначить</button>
+        <a asp-action="Players" class="btn btn-outline-light">Отмена</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const freeBetFields = document.getElementById('freeBetFields');
+            const spinFields = document.getElementById('spinFields');
+            const radios = document.querySelectorAll('.bonus-kind');
+
+            function updateFields() {
+                const spins = document.getElementById('kindSpins').checked;
+                freeBetFields.style.display = spins ? 'none' : 'block';
+                spinFields.style.display = spins ? 'block' : 'none';
+            }
+
+            radios.forEach(r => r.addEventListener('change', updateFields));
+            updateFields();
+        })();
+    </script>
+}

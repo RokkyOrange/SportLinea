@@ -1,0 +1,364 @@
+@model PlayerStatsViewModel
+
+
+
+@{
+
+    ViewData["Title"] = "Статистика";
+
+    var sportsWinRate = Model.TotalBets > 0 ? Model.Wins * 100.0 / Model.TotalBets : 0d;
+
+    var crazyTimeAllowed = ViewBag.CrazyTimeAllowed as bool? ?? true;
+
+}
+
+
+
+<h1 class="page-title">Личная статистика</h1>
+
+
+
+<h2 class="section-title">Спортивные ставки</h2>
+
+<div class="row">
+
+    <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.TotalBets</div><div class="stat-label">Всего ставок</div></div></div>
+
+    <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Wins</div><div class="stat-label">Побед</div></div></div>
+
+    <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@Model.Losses</div><div class="stat-label">Поражений</div></div></div>
+
+    <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:#f39c12">@Model.Pending</div><div class="stat-label">В ожидании</div></div></div>
+
+    <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.TotalStaked.ToString("N0")</div><div class="stat-label">Поставлено ₽</div></div></div>
+
+    <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.TotalWinnings.ToString("N0")</div><div class="stat-label">Выиграно ₽</div></div></div>
+
+</div>
+
+
+
+@if (Model.TotalBets > 0)
+
+{
+
+    <partial name="_WinRatePanel" model="sportsWinRate" />
+
+}
+
+
+
+@if (crazyTimeAllowed)
+
+{
+
+    <h2 class="section-title">🎡 Crazy Time</h2>
+
+
+
+    @if (Model.Roulette.TotalSpins == 0)
+
+    {
+
+        <div class="card-panel text-center mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted)">Вы ещё не играли в Crazy Time</p>
+
+        </div>
+
+    }
+
+    else
+
+    {
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.Roulette.TotalSpins</div><div class="stat-label">Всего спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Roulette.SuccessfulSpins</div><div class="stat-label">Удачных спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@Model.Roulette.TotalSpent.ToString("N2")</div><div class="stat-label">Потрачено ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Roulette.TotalWon.ToString("N2")</div><div class="stat-label">Выиграно всего ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Roulette.WonHotSpins.ToString("N2")</div><div class="stat-label">Выиграно в HOT SPINS ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Roulette.WonCrazy.ToString("N2")</div><div class="stat-label">Выиграно в CRAZY ₽</div></div></div>
+
+        </div>
+
+
+
+        <partial name="_WinRatePanel" model="Model.Roulette.WinPercent" />
+
+
+
+        <div class="card-panel mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted); font-size: 0.875rem">
+
+                Учитываются все спины: основное колесо, HOT SPINS и CRAZY. Удачный спин — ×2/×3, попадание в бонус, выигрыш в HOT SPINS или джекпот в CRAZY. Проигрыш — ×0 или BUST.
+
+                «Потрачено» — платные ставки на основном колесе и покупки бонусов (без бесплатных спинов).
+
+            </p>
+
+        </div>
+
+    }
+
+}
+
+
+
+@if (crazyTimeAllowed)
+
+{
+
+    <h2 class="section-title">🤠 Bingo Plinko Wild West</h2>
+
+
+
+    @if (Model.Plinko.TotalSpins == 0)
+
+    {
+
+        <div class="card-panel text-center mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted)">Вы ещё не играли в Bingo Plinko Wild West</p>
+
+        </div>
+
+    }
+
+    else
+
+    {
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.Plinko.TotalSpins</div><div class="stat-label">Всего спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Plinko.SuccessfulSpins</div><div class="stat-label">Удачных спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@Model.Plinko.TotalSpent.ToString("N2")</div><div class="stat-label">Потрачено ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Plinko.TotalWon.ToString("N2")</div><div class="stat-label">Выиграно всего ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Plinko.WonBountyHunter.ToString("N2")</div><div class="stat-label">Выиграно в BOUNTY HUNTER ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:#f39c12">×@Model.Plinko.MaxBountyMultiplier</div><div class="stat-label">Максимальный X в BOUNTY HUNTER</div></div></div>
+
+        </div>
+
+
+
+        <partial name="_WinRatePanel" model="Model.Plinko.WinPercent" />
+
+
+
+        <div class="card-panel mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted); font-size: 0.875rem">
+
+                Учитываются спины основного поля (раунд из 3 фишек) и каждый выстрел в BOUNTY HUNTER.
+
+                Удачный спин — выигрыш на поле, попадание в бонус, пуля или множитель на тарелке.
+
+                «Потрачено» — ставки на поле и покупка бонуса Bounty Hunter.
+
+            </p>
+
+        </div>
+
+    }
+
+}
+
+
+
+@if (crazyTimeAllowed)
+
+{
+
+    <h2 class="section-title">⚡ Zeus vs Hades</h2>
+
+
+
+    @if (Model.Zeus.TotalSpins == 0)
+
+    {
+
+        <div class="card-panel text-center mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted)">Вы ещё не играли в Zeus vs Hades</p>
+
+        </div>
+
+    }
+
+    else
+
+    {
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.Zeus.TotalSpins</div><div class="stat-label">Всего спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Zeus.SuccessfulSpins</div><div class="stat-label">Удачных спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@Model.Zeus.TotalSpent.ToString("N2")</div><div class="stat-label">Потрачено ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:#7b5cff">@Model.Zeus.WonZeus.ToString("N2")</div><div class="stat-label">Выиграл Zeus ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:#ff6b35">@Model.Zeus.WonHades.ToString("N2")</div><div class="stat-label">Выиграл Hades ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Zeus.WonConfrontation.ToString("N2")</div><div class="stat-label">Выиграно в Confrontation ₽</div></div></div>
+
+        </div>
+
+
+
+        <partial name="_WinRatePanel" model="Model.Zeus.WinPercent" />
+
+
+
+        <div class="card-panel mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted); font-size: 0.875rem">
+
+                Учитываются основной раунд сетки и каждый раунд бонуса Confrontation.
+
+                Удачный спин — выигрыш на поле, попадание в Confrontation или выигрыш в бонусном раунде.
+
+                «Выиграл Zeus» — сумма, где на пересечении выбран множитель молнии (столбец).
+
+                «Выиграл Hades» — сумма, где выбран множитель огня (строка).
+
+            </p>
+
+        </div>
+
+    }
+
+}
+
+
+
+@if (crazyTimeAllowed)
+
+{
+
+    <h2 class="section-title">🏰 Camelot's Gold</h2>
+
+
+
+    @if (Model.Camelot.TotalSpins == 0 && Model.Camelot.TotalSpent == 0)
+
+    {
+
+        <div class="card-panel text-center mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted)">Вы ещё не играли в Camelot's Gold</p>
+
+        </div>
+
+    }
+
+    else
+
+    {
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.Camelot.TotalSpins</div><div class="stat-label">Всего спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Camelot.SuccessfulSpins</div><div class="stat-label">Удачных спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@Model.Camelot.TotalSpent.ToString("N2")</div><div class="stat-label">Потрачено ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Camelot.TotalWon.ToString("N2")</div><div class="stat-label">Выиграно всего ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Camelot.WonBonus.ToString("N2")</div><div class="stat-label">Выиграно в бонусной игре ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:#c9a227">@Model.Camelot.MaxCollectorNominal.ToString("G29")</div><div class="stat-label">Максимальный сбор коллектора</div></div></div>
+
+        </div>
+
+
+
+        <partial name="_WinRatePanel" model="Model.Camelot.WinPercent" />
+
+
+
+        <div class="card-panel mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted); font-size: 0.875rem">
+
+                Статистика накапливается за всё время игры в слот. «Потрачено» — сумма всех ставок (оборот):
+                если выигрыш снова ставится, оборот растёт быстрее, чем сумма пополнений.
+
+                Учитываются обычные спины и покупка бонуса. Удачный спин — любой выигрыш или запуск бонусной игры 🏰.
+
+                «Максимальный сбор коллектора» — наибольший номинал, собранный коллектором за один спин (в обычной игре или в бонусе).
+
+            </p>
+
+        </div>
+
+    }
+
+}
+
+
+
+@if (crazyTimeAllowed)
+
+{
+
+    <h2 class="section-title">⚡ Fruitland 1000</h2>
+
+    @if (Model.Fruitland.TotalSpins == 0 && Model.Fruitland.TotalSpent == 0)
+
+    {
+
+        <div class="card-panel text-center mb-4">
+
+            <p class="mb-0" style="color: var(--color-text-muted)">Вы ещё не играли в Fruitland 1000</p>
+
+        </div>
+
+    }
+
+    else
+
+    {
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value">@Model.Fruitland.TotalSpins</div><div class="stat-label">Всего спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Fruitland.SuccessfulSpins</div><div class="stat-label">Удачных спинов</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-danger)">@Model.Fruitland.TotalSpent.ToString("N2")</div><div class="stat-label">Потрачено ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Fruitland.TotalWon.ToString("N2")</div><div class="stat-label">Выиграно всего ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:var(--color-success)">@Model.Fruitland.WonBonus.ToString("N2")</div><div class="stat-label">Выиграно в бонусе ₽</div></div></div>
+
+            <div class="col-md-4 mb-3"><div class="stat-card"><div class="stat-value" style="color:#ffd54f">×@Model.Fruitland.MaxGlobalMultiplier</div><div class="stat-label">Макс. общий × в бонусе</div></div></div>
+
+        </div>
+
+        <partial name="_WinRatePanel" model="Model.Fruitland.WinPercent" />
+
+    }
+
+}
+
+
+
+<a asp-action="Index" class="btn btn-outline-light mt-3">← Назад в кабинет</a>
+
+

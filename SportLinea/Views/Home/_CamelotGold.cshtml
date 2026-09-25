@@ -1,0 +1,94 @@
+@model HomeViewModel
+@using SportLinea.Models
+@{
+    var defaultStake = CamelotGoldConfig.GetDefaultStake(Model.PlayerBalance ?? 0);
+}
+
+<section class="camelot-section mt-4">
+    <div class="camelot-header">
+        <h2 class="section-title mb-1">🏰 Camelot's Gold</h2>
+        <p class="camelot-subtitle">Поле 9×9. Кластеры монет, коллектор, ×-монета и бонус 🏰. Покупка функции ×@CamelotGoldConfig.FeatureBuyMultiplier · бонуса ×@CamelotGoldConfig.BonusBuyMultiplier от ставки.</p>
+        <div class="mt-3">
+            <partial name="_RefreshLineForm" view-data='new ViewDataDictionary(ViewData) { { "ReturnHome", true }, { "ButtonClass", "btn btn-outline-light" } }' />
+        </div>
+    </div>
+
+    <div class="row align-items-start justify-content-center">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+            <div id="camelotGamePanel" class="camelot-game-panel">
+                <div class="camelot-grid-wrap">
+                    <div class="camelot-grid" id="camelotGrid">
+                        @for (var r = 0; r < CamelotGoldConfig.GridSize; r++)
+                        {
+                            @for (var c = 0; c < CamelotGoldConfig.GridSize; c++)
+                            {
+                                <div class="camelot-cell" data-row="@r" data-col="@c">
+                                    <span class="camelot-cell-inner"></span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+                <div id="camelotBonusBanner" class="camelot-bonus-banner" hidden>Бонус Camelot</div>
+            </div>
+            @if (User.IsInRole(Roles.Player))
+            {
+                <div class="slot-play-dock">
+                    <button type="button" class="btn btn-primary btn-lg w-100" id="camelotSpinBtn">🏰 Крутить!</button>
+                    <div id="camelotResult" class="roulette-result mt-3 slot-payout-box">Выплата: —</div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-panel camelot-panel">
+                <h4>Camelot's Gold</h4>
+                <p style="color: var(--color-text-muted); font-size: 0.9rem">
+                    Спин открывает соседние монеты. Коллектор собирает номинал и запускает новую волну. ×-монета — в конце спина.
+                </p>
+
+                @if (User.IsInRole(Roles.Player))
+                {
+                    <p class="mb-2">Баланс: <strong id="camelotBalance" data-casino-balance style="color: var(--color-accent)">@(Model.PlayerBalance?.ToString("N2") ?? "0") ₽</strong></p>
+
+                    <form id="camelotForm"
+                          data-spin-url="@Url.Action("Spin", "CamelotGold")"
+                          data-buy-url="@Url.Action("BuyBonus", "CamelotGold")"
+                          data-feature-url="@Url.Action("BuyFeature", "CamelotGold")"
+                          data-complete-url="@Url.Action("AnimationComplete", "CamelotGold")"
+                          data-buy-multiplier="@CamelotGoldConfig.BonusBuyMultiplier"
+                          data-feature-multiplier="@CamelotGoldConfig.FeatureBuyMultiplier">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3" id="camelotStakeGroup">
+                            <label class="form-label">Сумма ставки</label>
+                            <input type="hidden" name="amount" id="camelotAmount" value="@((int)defaultStake)" />
+                            <div class="roulette-stake-options" id="camelotStakeOptions">
+                                @foreach (var stake in CamelotGoldConfig.AllowedStakes)
+                                {
+                                    var affordable = (Model.PlayerBalance ?? 0) >= stake;
+                                    <button type="button"
+                                            class="roulette-stake-chip camelot-stake-chip@(stake == defaultStake ? " active" : "")@(affordable ? "" : " disabled")"
+                                            data-amount="@((int)stake)"
+                                            @(affordable ? "" : "disabled")>
+                                        @stake.ToString("N0") ₽
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-info btn-lg w-100 mt-2" id="camelotFeatureBtn">Купить функцию</button>
+                        <button type="button" class="btn btn-warning btn-lg w-100 mt-2" id="camelotBuyBtn">Купить бонус</button>
+                        <p class="mt-2 mb-0 text-center" style="color: var(--color-text-muted); font-size: 0.85rem" id="camelotFeaturePriceHint"></p>
+                        <p class="mt-1 mb-0 text-center" style="color: var(--color-text-muted); font-size: 0.85rem" id="camelotBuyPriceHint"></p>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <p style="color: var(--color-text-muted)">Войдите как игрок, чтобы играть</p>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Войти</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

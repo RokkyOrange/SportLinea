@@ -1,0 +1,131 @@
+@model HomeViewModel
+@using SportLinea.Models
+@{
+    var defaultStake = PlinkoWildWestConfig.GetDefaultStake(Model.PlayerBalance ?? 0);
+}
+
+<section class="plinko-wildwest-section mt-4">
+    <div class="plinko-wildwest-header">
+        <h2 class="section-title mb-1">🤠 Bingo Plinko Wild West</h2>
+        <p class="plinko-wildwest-subtitle">Откройте 3 фишки из 12. Bounty Hunter — до ~6000× ставки!</p>
+        <div class="mt-3">
+            <partial name="_RefreshLineForm" view-data='new ViewDataDictionary(ViewData) { { "ReturnHome", true }, { "ButtonClass", "btn btn-outline-light" } }' />
+        </div>
+    </div>
+
+    <div class="row align-items-start justify-content-center">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+            <div id="plinkoMainPanel">
+                <div class="plinko-tiles-grid" id="plinkoTilesGrid">
+                    @for (var i = 0; i < PlinkoWildWestConfig.TileCount; i++)
+                    {
+                        <button type="button" class="plinko-tile" data-index="@i" disabled>
+                            <span class="plinko-tile-back">?</span>
+                            <span class="plinko-tile-front" aria-hidden="true"></span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div id="plinkoBountyPanel" class="plinko-bounty-panel" style="display:none">
+                <div class="plinko-bounty-stats">
+                    <span>Уровень <strong id="bountyLevel">1</strong>/3</span>
+                    <span>Пули <strong id="bountyBullets">0</strong>/<span id="bountyBulletsRequired">@PlinkoWildWestConfig.BulletsToAdvance</span></span>
+                    <span>Спины <strong id="bountySpins">0</strong></span>
+                    <span>Множитель: <strong id="bountyMultSum">0</strong></span>
+                </div>
+                <div class="plinko-bounty-plates" id="bountyPlates">
+                    @for (var i = 0; i < PlinkoWildWestConfig.BountyPlates; i++)
+                    {
+                        <button type="button" class="plinko-bounty-plate" data-target="@i" disabled>
+                            <span class="plinko-skeet-disc" aria-hidden="true"></span>
+                            <span class="plinko-bounty-outcome" hidden></span>
+                        </button>
+                    }
+                </div>
+                <div id="plinkoBountyPrompt" class="plinko-bounty-prompt" hidden>
+                    <div class="plinko-bounty-prompt-card">
+                        <p id="plinkoBountyPromptText"></p>
+                        <button type="button" class="btn btn-primary btn-lg" id="plinkoBountyPromptBtn"></button>
+                    </div>
+                </div>
+            </div>
+            @if (User.IsInRole(Roles.Player))
+            {
+                <div class="slot-play-dock">
+                    <button type="button" class="btn btn-primary btn-lg w-100" id="plinkoSpinBtn">🎲 Новый раунд</button>
+                    <div id="plinkoResult" class="roulette-result mt-3 slot-payout-box">Выплата: —</div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-panel plinko-panel">
+                <h4 id="plinkoPanelTitle">Дикий Запад</h4>
+                <p id="plinkoPanelDesc" style="color: var(--color-text-muted); font-size: 0.9rem">
+                    Выберите ставку и крутите раунд. Затем откройте любые 3 фишки.
+                </p>
+
+                @if (User.IsInRole(Roles.Player))
+                {
+                    <p class="mb-2">Баланс: <strong id="plinkoBalance" data-casino-balance style="color: var(--color-accent)">@(Model.PlayerBalance?.ToString("N2") ?? "0") ₽</strong></p>
+
+                    <form id="plinkoForm"
+                          data-spin-url="@Url.Action("Spin", "Plinko")"
+                          data-pick-url="@Url.Action("Pick", "Plinko")"
+                          data-bounty-url="@Url.Action("BountyShoot", "Plinko")"
+                          data-buy-bounty-url="@Url.Action("BuyBounty", "Plinko")"
+                          data-bounty-buy-multiplier="@PlinkoWildWestConfig.BountyBuyPriceMultiplier"
+                          data-free-bounty-stake="@((int)Model.FreePlinkoBountyStake)">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3" id="plinkoStakeGroup">
+                            <label class="form-label">Сумма ставки</label>
+                            <input type="hidden" name="amount" id="plinkoAmount" value="@((int)defaultStake)" />
+                            <div class="roulette-stake-options" id="plinkoStakeOptions">
+                                @foreach (var stake in PlinkoWildWestConfig.AllowedStakes)
+                                {
+                                    var affordable = (Model.PlayerBalance ?? 0) >= stake;
+                                    <button type="button"
+                                            class="roulette-stake-chip plinko-stake-chip@(stake == defaultStake ? " active" : "")@(affordable ? "" : " disabled")"
+                                            data-amount="@((int)stake)"
+                                            @(affordable ? "" : "disabled")>
+                                        @stake.ToString("N0") ₽
+                                    </button>
+                                }
+                            </div>
+                            @if (Model.FreePlinkoBountyAvailable)
+                            {
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" name="useFreeBounty" id="useFreePlinkoBounty" value="true" />
+                                    <label class="form-check-label" for="useFreePlinkoBounty" style="color: var(--color-accent)">
+                                        Бесплатная Bounty Hunter @Model.FreePlinkoBountyStake.ToString("N0") ₽ (номинал @BonusRules.FreePlinkoBountyValue.ToString("N0") ₽)
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <div class="roulette-buy-section mb-3" id="plinkoBuyBonusGroup">
+                            <div class="roulette-buy-section-title">
+                                Купить Bounty Hunter
+                                <span class="roulette-buy-hint">×@PlinkoWildWestConfig.BountyBuyPriceMultiplier от ставки</span>
+                            </div>
+                            <div class="roulette-buy-options" style="grid-template-columns: 1fr">
+                                <button type="button" class="roulette-buy-card" id="plinkoBuyBountyBtn">
+                                    <span class="roulette-buy-icon">⭐</span>
+                                    <span class="roulette-buy-name">Bounty Hunter</span>
+                                    <span class="roulette-buy-price" id="plinkoBuyBountyPrice">—</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <p style="color: var(--color-text-muted)">Войдите как игрок, чтобы играть</p>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary me-2">Войти</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

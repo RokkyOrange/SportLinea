@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>@ViewData["Title"] — БК «СпортЛиния»</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/mobile-app.css" asp-append-version="true" />
+</head>
+<body class="mobile-body">
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    bool Tab(string name) => string.Equals(controller, name, StringComparison.OrdinalIgnoreCase);
+    var cabinetActive = Tab("Profile") || Tab("Bets") || Tab("Account");
+    var showCabinetBack = (Tab("Profile") && !string.Equals(action, "Index", StringComparison.OrdinalIgnoreCase))
+        || Tab("Bets");
+    ApplicationUser? headerPlayer = null;
+    if (User.Identity?.IsAuthenticated == true)
+        headerPlayer = await UserManager.GetUserAsync(User);
+}
+    <div class="mobile-frame">
+        <header class="mobile-topbar">
+            <a class="mobile-brand" asp-controller="Home" asp-action="Index">
+                ⚽ Спорт<span>Линия</span>
+            </a>
+            <div class="mobile-top-actions">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (!string.IsNullOrWhiteSpace(headerPlayer?.FullName))
+                    {
+                        <span class="mobile-user-name" title="@headerPlayer.FullName">@headerPlayer.FullName</span>
+                    }
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="mobile-text-btn">Выход</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="mobile-text-btn" asp-controller="Account" asp-action="Login">Вход</a>
+                    <a class="mobile-text-btn accent" asp-controller="Account" asp-action="Register">Регистрация</a>
+                }
+            </div>
+        </header>
+        @if (showCabinetBack)
+        {
+            <div class="mobile-subnav">
+                <a asp-controller="Profile" asp-action="Index">← Назад в кабинет</a>
+            </div>
+        }
+
+        <main class="mobile-content">
+            @await Html.PartialAsync("_FlashAlerts")
+            @RenderBody()
+        </main>
+
+        <nav class="mobile-tabbar" aria-label="Основное меню">
+            <a class="mobile-tab @(Tab("Home") ? "is-active" : "")" asp-controller="Home" asp-action="Index">
+                <span class="mobile-tab-icon">🏠</span>
+                <span>Главная</span>
+            </a>
+            <a class="mobile-tab @(Tab("Line") || Tab("Events") ? "is-active" : "")" asp-controller="Line" asp-action="Index">
+                <span class="mobile-tab-icon">📋</span>
+                <span>Линия</span>
+            </a>
+            <a class="mobile-tab @(Tab("Results") ? "is-active" : "")" asp-controller="Results" asp-action="Index">
+                <span class="mobile-tab-icon">✅</span>
+                <span>Итоги</span>
+            </a>
+            <a class="mobile-tab @(Tab("Rating") ? "is-active" : "")" asp-controller="Rating" asp-action="Index">
+                <span class="mobile-tab-icon">🏆</span>
+                <span>Рейтинг</span>
+            </a>
+            @if (User.IsInRole(Roles.Player))
+            {
+                <a class="mobile-tab @(cabinetActive ? "is-active" : "")" asp-controller="Profile" asp-action="Index">
+                    <span class="mobile-tab-icon">👤</span>
+                    <span>Кабинет</span>
+                </a>
+            }
+            else
+            {
+                <a class="mobile-tab @(Tab("Account") ? "is-active" : "")" asp-controller="Account" asp-action="Login">
+                    <span class="mobile-tab-icon">🔑</span>
+                    <span>Войти</span>
+                </a>
+            }
+        </nav>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

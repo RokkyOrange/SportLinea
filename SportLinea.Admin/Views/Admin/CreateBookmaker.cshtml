@@ -1,0 +1,41 @@
+@model CreateBookmakerViewModel
+@{
+    ViewData["Title"] = "Создание букмекера";
+}
+
+<h1 class="page-title">Создание учётной записи букмекера</h1>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card-panel">
+            <form asp-action="CreateBookmaker" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-validation"></span>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary">Создать</button>
+                <a asp-action="Index" class="btn btn-outline-light">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

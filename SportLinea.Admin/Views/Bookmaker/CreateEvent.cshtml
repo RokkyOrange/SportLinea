@@ -1,0 +1,95 @@
+@model CreateEventViewModel
+@using System.Text.Json
+@using SportLinea.Models
+@{
+    ViewData["Title"] = "Создание события";
+    var sportsByCategory = SportTypes.GetByCategory();
+}
+
+<h1 class="page-title">Создание спортивного события</h1>
+
+<div class="card-panel">
+    <form asp-action="CreateEvent" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="SportCategory" class="form-label"></label>
+                <select asp-for="SportCategory" class="form-select" id="sportCategory">
+                    @foreach (var category in SportTypes.AllCategories)
+                    {
+                        <option value="@category">@category</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="SportType" class="form-label"></label>
+                <select asp-for="SportType" class="form-select" id="sportType"></select>
+                <span asp-validation-for="SportType" class="text-validation"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="StartDate" class="form-label"></label>
+                <input asp-for="StartDate" class="form-control" type="datetime-local" />
+            </div>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" placeholder="Турнир: Команда 1 — Команда 2" />
+        </div>
+        <h5 class="mt-4" style="color: var(--color-accent)">Коэффициенты</h5>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="Outcome1" class="form-label"></label>
+                <input asp-for="Outcome1" class="form-control" />
+                <label asp-for="Coefficient1" class="form-label mt-2"></label>
+                <input asp-for="Coefficient1" class="form-control" type="number" step="0.01" min="1.01" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Outcome2" class="form-label"></label>
+                <input asp-for="Outcome2" class="form-control" />
+                <label asp-for="Coefficient2" class="form-label mt-2"></label>
+                <input asp-for="Coefficient2" class="form-control" type="number" step="0.01" min="1.01" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Outcome3" class="form-label"></label>
+                <input asp-for="Outcome3" class="form-control" />
+                <label asp-for="Coefficient3" class="form-label mt-2"></label>
+                <input asp-for="Coefficient3" class="form-control" type="number" step="0.01" min="1.01" />
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Создать</button>
+        <a asp-action="Events" class="btn btn-outline-light">Отмена</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const sportsByCategory = @Html.Raw(JsonSerializer.Serialize(sportsByCategory));
+        const categorySelect = document.getElementById('sportCategory');
+        const sportSelect = document.getElementById('sportType');
+        const initialSport = @Html.Raw(JsonSerializer.Serialize(Model.SportType));
+
+        function updateSportTypes() {
+            const category = categorySelect.value;
+            const sports = sportsByCategory[category] || [];
+            const previous = sportSelect.value;
+            sportSelect.innerHTML = '';
+
+            sports.forEach(sport => {
+                const option = document.createElement('option');
+                option.value = sport;
+                option.textContent = sport;
+                sportSelect.appendChild(option);
+            });
+
+            if (sports.includes(previous)) {
+                sportSelect.value = previous;
+            } else if (sports.includes(initialSport)) {
+                sportSelect.value = initialSport;
+            }
+        }
+
+        categorySelect.addEventListener('change', updateSportTypes);
+        updateSportTypes();
+    </script>
+}

@@ -1,0 +1,102 @@
+@model HomeViewModel
+@using SportLinea.Models
+@{
+    var defaultStake = Fruitland1000Config.GetDefaultStake(Model.PlayerBalance ?? 0);
+}
+
+<section class="fruitland-section mt-4">
+    <div class="fruitland-header">
+        <h2 class="section-title mb-1">⚡ Return of Zeus: Fruitland 1000</h2>
+        <p class="fruitland-subtitle">
+            Кластеры 6×5, молния ×, бонус 💎. 4💎 — 10 FS, 5💎 — 15 FS. В бонусе: 3💎 — +5 FS, 4💎 — +10 FS.<br />
+            Покупка бонуса: ×@Fruitland1000Config.BonusBuy10Multiplier (10 FS) ·
+            ×@Fruitland1000Config.BonusBuy15Multiplier (15 FS) · ×@Fruitland1000Config.BonusBuy20Multiplier (20 FS)
+        </p>
+        <div class="mt-3">
+            <partial name="_RefreshLineForm" view-data='new ViewDataDictionary(ViewData) { { "ReturnHome", true }, { "ButtonClass", "btn btn-outline-light" } }' />
+        </div>
+    </div>
+
+    <div class="row align-items-start justify-content-center">
+        <div class="col-lg-7 mb-4 mb-lg-0">
+            <div id="fruitlandGamePanel" class="fruitland-game-panel">
+                <div class="fruitland-top-bar">
+                    <div id="fruitlandGlobalMult" class="fruitland-global-mult" title="Общий × бонуса">×0</div>
+                    <div id="fruitlandBonusBanner" class="fruitland-bonus-banner" hidden>Бонус Fruitland</div>
+                    <div id="fruitlandFreeSpinInfo" class="fruitland-freespin-info"></div>
+                </div>
+                <div class="fruitland-grid-wrap">
+                    <div class="fruitland-grid" id="fruitlandGrid">
+                        @for (var r = 0; r < Fruitland1000Config.Rows; r++)
+                        {
+                            @for (var c = 0; c < Fruitland1000Config.Cols; c++)
+                            {
+                                <div class="fruitland-cell" data-row="@r" data-col="@c">
+                                    <span class="fruitland-cell-inner"></span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            @if (User.IsInRole(Roles.Player))
+            {
+                <div class="slot-play-dock">
+                    <button type="button" class="w-100 fruitland-action-btn fruitland-btn-blue" id="fruitlandSpinBtn">⚡ Крутить!</button>
+                    <div id="fruitlandResult" class="roulette-result mt-3 slot-payout-box">Выплата: —</div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-panel fruitland-panel">
+                <h4>Fruitland 1000</h4>
+                <p style="color: var(--color-text-muted); font-size: 0.9rem">
+                    Соединяйте кластеры от 5 символов. ⚡ — вилд и ×. 4💎 — 10 FS, 5💎 — 15 FS.
+                </p>
+
+                @if (User.IsInRole(Roles.Player))
+                {
+                    <p class="mb-2">Баланс: <strong id="fruitlandBalance" data-casino-balance style="color: var(--color-accent)">@(Model.PlayerBalance?.ToString("N2") ?? "0") ₽</strong></p>
+
+                    <form id="fruitlandForm"
+                          data-spin-url="@Url.Action("Spin", "Fruitland1000")"
+                          data-buy-url="@Url.Action("BuyBonus", "Fruitland1000")"
+                          data-complete-url="@Url.Action("AnimationComplete", "Fruitland1000")"
+                          data-buy10-multiplier="@Fruitland1000Config.BonusBuy10Multiplier"
+                          data-buy15-multiplier="@Fruitland1000Config.BonusBuy15Multiplier"
+                          data-buy20-multiplier="@Fruitland1000Config.BonusBuy20Multiplier">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3" id="fruitlandStakeGroup">
+                            <label class="form-label">Сумма ставки</label>
+                            <input type="hidden" name="amount" id="fruitlandAmount" value="@((int)defaultStake)" />
+                            <div class="roulette-stake-options" id="fruitlandStakeOptions">
+                                @foreach (var stake in Fruitland1000Config.AllowedStakes)
+                                {
+                                    var affordable = (Model.PlayerBalance ?? 0) >= stake;
+                                    <button type="button"
+                                            class="roulette-stake-chip fruitland-stake-chip@(stake == defaultStake ? " active" : "")@(affordable ? "" : " disabled")"
+                                            data-amount="@((int)stake)"
+                                            @(affordable ? "" : "disabled")>
+                                        @stake.ToString("N0") ₽
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <button type="button" class="w-100 fruitland-action-btn fruitland-btn-blue" id="fruitlandBuy10Btn">Бонус 10 FS</button>
+                        <button type="button" class="w-100 mt-2 fruitland-action-btn fruitland-btn-blue" id="fruitlandBuy15Btn">Бонус 15 FS</button>
+                        <button type="button" class="w-100 mt-2 fruitland-action-btn fruitland-btn-cyclamen" id="fruitlandBuy20Btn">Бонус 20 FS (эксклюзив)</button>
+                        <p class="mt-2 mb-0 text-center" style="color: var(--color-text-muted); font-size: 0.85rem" id="fruitlandBuyHints"></p>
+                    </form>
+                }
+                else
+                {
+                    <div class="text-center py-3">
+                        <p style="color: var(--color-text-muted)">Войдите как игрок, чтобы играть</p>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Войти</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

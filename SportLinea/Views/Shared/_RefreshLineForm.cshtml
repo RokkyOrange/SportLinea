@@ -1,0 +1,13 @@
+@{
+    var returnHome = ViewData["ReturnHome"] as bool? ?? false;
+    var buttonClass = ViewData["ButtonClass"] as string ?? "btn btn-primary";
+}
+
+<form asp-controller="Line" asp-action="Refresh" method="post" class="d-inline">
+    @Html.AntiForgeryToken()
+    @if (returnHome)
+    {
+        <input type="hidden" name="returnHome" value="true" />
+    }
+    <button type="submit" class="@buttonClass">🔄 Обновить линию</button>
+</form>

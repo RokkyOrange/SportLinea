@@ -1,0 +1,47 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Вход в АРМ";
+}
+
+<h1 class="page-title">Вход в административный сайт</h1>
+<p style="color: var(--color-text-muted)">АРМ букмекера и суперпользователя. Работа рассчитана на ПК.</p>
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card-panel">
+            <form asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-validation"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-validation"></span>
+                </div>
+                <div class="mb-3 form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Войти</button>
+            </form>
+            <p class="mt-3 mb-0 text-center" style="color: var(--color-text-muted); font-size: 0.9rem">
+                Игроки входят на клиентском сайте:<br />
+                <a href="@SiteUrls.Client">@SiteUrls.Client</a>
+            </p>
+            <hr style="border-color: var(--color-border)" />
+            <small style="color: var(--color-text-muted)">
+                Тестовые аккаунты:<br />
+                Букмекер: bookmaker@sportlinea.ru / Book123!<br />
+                Админ: admin@sportlinea.ru / Admin123!
+            </small>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

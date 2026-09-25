@@ -1,0 +1,44 @@
+@model List<Notification>
+
+@{
+
+    ViewData["Title"] = "Уведомления";
+
+}
+
+
+
+<h1 class="page-title">Уведомления</h1>
+
+
+
+@if (!Model.Any())
+
+{
+
+    <div class="card-panel text-center">
+
+        <p style="color: var(--color-text-muted)">Нет уведомлений</p>
+
+    </div>
+
+}
+
+else
+
+{
+
+    @foreach (var n in Model)
+
+    {
+
+        <partial name="_NotificationCard" model="n" />
+
+    }
+
+}
+
+
+
+<a asp-action="Index" class="btn btn-outline-light mt-3">← Назад</a>
+

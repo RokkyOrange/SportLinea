@@ -1,0 +1,25 @@
+@model BlockPlayerViewModel
+@{
+    ViewData["Title"] = "Блокировка игрока";
+}
+
+<h1 class="page-title">Заблокировать игрока: @Model.PlayerName</h1>
+
+<div class="card-panel">
+    <form asp-action="BlockPlayer" method="post">
+        <input type="hidden" asp-for="PlayerId" />
+        <input type="hidden" asp-for="PlayerName" />
+        <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+        <div class="mb-3">
+            <label asp-for="BlockReason" class="form-label"></label>
+            <textarea asp-for="BlockReason" class="form-control" rows="4" placeholder="Опишите причину блокировки — она будет показана игроку при попытке входа"></textarea>
+            <span asp-validation-for="BlockReason" class="text-validation"></span>
+        </div>
+        <button type="submit" class="btn btn-danger">Заблокировать</button>
+        <a asp-action="Players" class="btn btn-outline-light">Отмена</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

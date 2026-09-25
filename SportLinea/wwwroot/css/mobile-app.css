@@ -1,0 +1,450 @@
+/* Клиентский сайт — мобильный вариант. Стили не зависят от ширины окна:
+   рамка 430px на большом мониторе, поэтому vw и breakpoint'ы Bootstrap lg/md не подходят. */
+
+html:has(.mobile-body) {
+    height: 100%;
+    overflow: hidden;
+}
+
+.mobile-body {
+    margin: 0;
+    background: #04110c;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+.mobile-frame {
+    width: 100%;
+    max-width: 430px;
+    height: 100%;
+    height: 100dvh;
+    margin: 0 auto;
+    background: var(--color-bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+}
+
+@media (min-width: 480px) {
+    .mobile-body {
+        padding: 18px 0;
+        background:
+            radial-gradient(ellipse at top, #1a5c47 0%, transparent 45%),
+            #04110c;
+    }
+
+    .mobile-frame {
+        height: calc(100% - 36px);
+        height: calc(100dvh - 36px);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow:
+            0 0 0 10px #0a1f18,
+            0 0 0 12px #f5c518,
+            0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+}
+
+.mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.45rem;
+    padding: 0.7rem 0.75rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%);
+    border-bottom: 2px solid var(--color-accent);
+    flex: 0 0 auto;
+    z-index: 20;
+    min-width: 0;
+}
+
+.mobile-back-btn {
+    flex: 0 0 auto;
+    color: var(--color-accent);
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 0.3rem 0.15rem;
+}
+
+.mobile-brand {
+    font-weight: 800;
+    font-size: 0.98rem;
+    color: var(--color-text);
+    text-decoration: none;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+}
+
+.mobile-brand span { color: var(--color-accent); }
+
+.mobile-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    flex: 0 0 auto;
+}
+
+.mobile-text-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.35rem 0.35rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.mobile-text-btn.accent { color: var(--color-accent); }
+
+.mobile-user-name {
+    max-width: 9.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.2;
+}
+
+.mobile-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 0.7rem 0.7rem 1rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-subnav {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.85rem;
+    background: #0a221c;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mobile-subnav a,
+.mobile-page-back {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-accent);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.mobile-page-back {
+    margin-bottom: 0.75rem;
+}
+
+.mobile-content img,
+.mobile-content svg,
+.mobile-content canvas,
+.mobile-content video,
+.mobile-content iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+.mobile-content h1,
+.mobile-content h2,
+.mobile-content h3,
+.mobile-content h4,
+.mobile-content p,
+.mobile-content li,
+.mobile-content .section-title,
+.mobile-content .page-title,
+.mobile-content .fruitland-subtitle,
+.mobile-content .crazy-time-subtitle,
+.mobile-content .camelot-subtitle,
+.mobile-content .zeus-hades-subtitle,
+.mobile-content .plinko-wildwest-subtitle,
+.mobile-content .alert {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.mobile-content .btn {
+    white-space: normal;
+    max-width: 100%;
+}
+
+.mobile-content .container,
+.mobile-content .container-fluid {
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.mobile-content .page-title {
+    font-size: 1.22rem;
+    margin-bottom: 0.75rem;
+}
+
+.mobile-content .hero-section {
+    padding: 1rem;
+    margin-bottom: 0.85rem;
+}
+
+.mobile-content .hero-section h1 { font-size: 1.32rem; }
+
+.mobile-content .btn-lg,
+.mobile-content .btn-primary,
+.mobile-content .wallet-action-btn {
+    min-height: 44px;
+}
+
+/* Bootstrap lg/md смотрит на окно браузера, а не на рамку телефона — колонки в ряд ломают слоты. */
+.mobile-content .row {
+    --bs-gutter-x: 0.6rem;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.mobile-content .row > * {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0.3rem;
+    padding-right: 0.3rem;
+    margin-bottom: 1rem !important;
+}
+
+.mobile-content .d-flex {
+    max-width: 100%;
+    min-width: 0;
+}
+
+.mobile-content .flex-nowrap {
+    flex-wrap: wrap !important;
+}
+
+.mobile-tabbar {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    background: #0d2a22;
+    border-top: 1px solid var(--color-border);
+    padding: 0.25rem 0.1rem calc(0.35rem + env(safe-area-inset-bottom));
+    z-index: 20;
+}
+
+.mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    min-height: 52px;
+    min-width: 0;
+    color: #8fa89a;
+    text-decoration: none;
+    font-size: 0.58rem;
+    font-weight: 700;
+    padding: 0.15rem 0.1rem;
+    text-align: center;
+    line-height: 1.15;
+    overflow: hidden;
+}
+
+.mobile-tab-icon { font-size: 1.05rem; line-height: 1; }
+
+.mobile-tab.is-active {
+    color: var(--color-accent);
+}
+
+.mobile-content .table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-content .table {
+    font-size: 0.75rem;
+}
+
+/* --- слоты: меньше паддингов, сетки на всю ширину рамки --- */
+
+.mobile-content .crazy-time-section,
+.mobile-content .fruitland-section,
+.mobile-content .camelot-section,
+.mobile-content .plinko-wildwest-section,
+.mobile-content .zeus-hades-section {
+    padding: 0.75rem 0.65rem 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 1rem;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.mobile-content .section-title {
+    font-size: 1.05rem;
+}
+
+.mobile-content .fruitland-subtitle,
+.mobile-content .crazy-time-subtitle,
+.mobile-content .camelot-subtitle,
+.mobile-content .zeus-hades-subtitle,
+.mobile-content .plinko-wildwest-subtitle {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+}
+
+.mobile-content .fruitland-grid-wrap,
+.mobile-content .camelot-grid-wrap,
+.mobile-content .zeus-grid-wrap,
+.mobile-content .plinko-tiles-grid,
+.mobile-content .wheel-container {
+    width: 100%;
+    max-width: 100%;
+    container-type: inline-size;
+}
+
+.mobile-content .fruitland-grid-wrap,
+.mobile-content .camelot-grid-wrap,
+.mobile-content .zeus-grid-wrap {
+    padding: 0.35rem;
+}
+
+.mobile-content .fruitland-grid {
+    gap: 0.2rem;
+}
+
+.mobile-content .fruitland-cell-inner {
+    font-size: 0.95rem;
+    font-size: clamp(0.7rem, 16cqi, 1.15rem);
+}
+
+.mobile-content .fruitland-lightning-mult .fruitland-cell-inner {
+    font-size: 0.7rem;
+    font-size: clamp(0.5rem, 11cqi, 0.85rem);
+}
+
+.mobile-content .camelot-grid {
+    gap: 0.12rem;
+}
+
+.mobile-content .camelot-cell-inner {
+    font-size: 0.48rem;
+    font-size: clamp(0.38rem, 7cqi, 0.58rem);
+}
+
+.mobile-content .zeus-board-line {
+    gap: 0.22rem;
+}
+
+.mobile-content .zeus-cell {
+    font-size: 0.72rem;
+    font-size: clamp(0.55rem, 10cqi, 0.9rem);
+    padding: 0.1rem;
+}
+
+.mobile-content .plinko-tiles-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+    max-width: 100%;
+}
+
+.mobile-content .plinko-tile-back,
+.mobile-content .plinko-tile-front {
+    font-size: clamp(0.85rem, 8cqi, 1.25rem);
+}
+
+.mobile-content .wheel-container {
+    width: 240px;
+    height: 240px;
+    max-width: 100%;
+    margin: 0 auto 0.5rem;
+}
+
+.mobile-content .wheel-container .wheel {
+    width: 100%;
+    height: 100%;
+}
+
+.mobile-content .wheel-label {
+    width: 32px;
+    margin-left: -16px;
+    margin-top: -82px;
+    transform-origin: 50% 82px;
+}
+
+.mobile-content .wheel-label span {
+    font-size: 0.62rem;
+    max-width: 48px;
+}
+
+.mobile-content .coef-btn {
+    min-width: 0;
+    flex: 1 1 5.2rem;
+    padding: 0.4rem 0.45rem;
+}
+
+.mobile-content .coefficients {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: stretch;
+}
+
+.mobile-content .wallet-action-btn {
+    min-width: 0;
+    flex: 1 1 calc(50% - 0.5rem);
+}
+
+.mobile-content .roulette-stake-chip,
+.mobile-content .fruitland-action-btn {
+    font-size: 0.92rem;
+}
+
+.mobile-content .fruitland-top-bar {
+    gap: 0.4rem;
+}
+
+.mobile-content .fruitland-global-mult {
+    min-width: 2.75rem;
+    font-size: 0.95rem;
+    padding: 0.3rem 0.45rem;
+}
+
+.mobile-content .fruitland-bonus-banner,
+.mobile-content .fruitland-freespin-info {
+    font-size: 0.78rem;
+    margin-left: 0;
+}
+
+.mobile-content .stat-value {
+    font-size: 1.15rem;
+    overflow-wrap: anywhere;
+}
+
+.mobile-content .card,
+.mobile-content .panel,
+.mobile-content .card-panel,
+.mobile-content .event-card {
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.mobile-content .event-title {
+    font-size: 1rem;
+}
+
+.mobile-content .btn-sm {
+    margin-bottom: 0.25rem;
+    white-space: normal;
+}

@@ -1,0 +1,108 @@
+@model SportEvent
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="card-panel">
+    <span class="event-sport">@Model.SportType</span>
+    <span class="badge badge-pending ms-2">@Model.SportCategory</span>
+    <h1 class="page-title mb-2">@Model.Title</h1>
+    <p class="event-date">Начало: @Model.StartDate.ToString("dd.MM.yyyy HH:mm")</p>
+    <p>
+        Статус:
+        @switch (Model.Status)
+        {
+            case EventStatus.AcceptingBets:
+                <span class="badge badge-pending">Принимает ставки</span>
+                break;
+            case EventStatus.Completed:
+                <span class="badge badge-won">Завершено — @Model.Result</span>
+                break;
+            case EventStatus.Cancelled:
+                <span class="badge badge-lost">Отменено</span>
+                break;
+        }
+    </p>
+</div>
+
+<h2 class="section-title">Доступные исходы</h2>
+
+@if (Model.Status == EventStatus.AcceptingBets && User.IsInRole(Roles.Player))
+{
+    var activeFreeBet = ViewBag.ActiveFreeBet as Bonus;
+    @if (activeFreeBet != null)
+    {
+        <div class="card-panel mb-3" style="border-color: var(--color-accent)">
+            <strong style="color: var(--color-accent)">🎁 Активный фрибет: @activeFreeBet.Amount.ToString("N0") ₽</strong>
+            <p class="mb-0 mt-1" style="color: var(--color-text-muted); font-size: 0.875rem">
+                Отметьте «Использовать фрибет» при ставке на любой исход ниже.
+            </p>
+        </div>
+    }
+    @foreach (var c in Model.Coefficients)
+    {
+        <div class="card-panel mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <strong>@c.OutcomeDescription</strong>
+                    <span class="coef-value ms-2">@c.Value.ToString("F2")</span>
+                </div>
+                <form asp-controller="Events" asp-action="PlaceBet" method="post" class="d-flex gap-2 align-items-center flex-wrap bet-form">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="SportEventId" value="@Model.Id" />
+                    <input type="hidden" name="CoefficientId" value="@c.Id" />
+                    @if (activeFreeBet != null)
+                    {
+                        <label class="d-flex align-items-center gap-1 mb-0" style="font-size: 0.85rem; color: var(--color-accent)">
+                            <input type="checkbox" name="UseFreeBet" value="true" class="use-free-bet-check" />
+                            Фрибет @activeFreeBet.Amount.ToString("N0") ₽
+                        </label>
+                    }
+                    <input type="number" name="Amount" class="form-control form-control-sm bet-amount-input" style="width:120px"
+                           placeholder="от @BetRules.MinAmount.ToString("N0") ₽" min="@((int)BetRules.MinAmount)" step="1" required />
+                    <button type="submit" class="btn btn-primary btn-sm">Поставить</button>
+                </form>
+            </div>
+        </div>
+    }
+    @if (activeFreeBet != null)
+    {
+        <script>
+            document.querySelectorAll('.use-free-bet-check').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const form = cb.closest('.bet-form');
+                    const input = form.querySelector('.bet-amount-input');
+                    if (cb.checked) {
+                        input.value = @((int)activeFreeBet.Amount);
+                        input.readOnly = true;
+                    } else {
+                        input.readOnly = false;
+                        input.value = '';
+                    }
+                });
+            });
+        </script>
+    }
+}
+else
+{
+    <div class="coefficients">
+        @foreach (var c in Model.Coefficients)
+        {
+            <div class="coef-btn" style="cursor: default">
+                <span>@c.OutcomeDescription</span>
+                <span class="coef-value">@c.Value.ToString("F2")</span>
+            </div>
+        }
+    </div>
+    @if (!User.Identity?.IsAuthenticated ?? true)
+    {
+        <p class="mt-3" style="color: var(--color-text-muted)">
+            <a asp-controller="Account" asp-action="Login" style="color: var(--color-accent)">Войдите</a> или
+            <a asp-controller="Account" asp-action="Register" style="color: var(--color-accent)">зарегистрируйтесь</a>,
+            чтобы сделать ставку.
+        </p>
+    }
+}
+
+<a asp-controller="Line" asp-action="Index" class="btn btn-outline-light mt-3">← Назад к линии</a>

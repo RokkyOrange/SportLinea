@@ -1,0 +1,165 @@
+@model HomeViewModel
+@using SportLinea.Models
+@{
+
+    ViewData["Title"] = "Главная";
+
+}
+
+
+
+<div class="hero-section">
+
+    <h1>БК «СпортЛиния»</h1>
+
+    <p>Информационная система букмекерской конторы. Ставки на спорт в режиме реального времени.</p>
+
+    <div class="mt-3">
+
+        <a asp-controller="Line" asp-action="Index" class="btn btn-primary me-2">Смотреть линию</a>
+
+        @if (!User.Identity?.IsAuthenticated ?? true)
+
+        {
+
+            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light">Зарегистрироваться</a>
+
+        }
+
+    </div>
+
+</div>
+
+
+
+@if (Model.ShowRoulette)
+
+{
+
+    @await Html.PartialAsync("_CrazyTimeRoulette", Model)
+
+    @await Html.PartialAsync("_PlinkoWildWest", Model)
+
+    @await Html.PartialAsync("_ZeusVsHades", Model)
+
+    @await Html.PartialAsync("_CamelotGold", Model)
+
+    @await Html.PartialAsync("_Fruitland1000", Model)
+
+}
+else if (Model.ShowEmptyLineRefresh)
+{
+    <partial name="_EmptyLineRefresh" />
+}
+
+else if (Model.TopEvents.Any())
+{
+
+    <h2 class="section-title">🔥 Топ событий</h2>
+
+    <div class="row">
+
+        @foreach (var e in Model.TopEvents)
+
+        {
+
+            <div class="col-md-4 mb-3">
+
+                <partial name="_EventCard" model="e" />
+
+            </div>
+
+        }
+
+    </div>
+
+
+
+    @if (Model.NewEvents.Any())
+
+    {
+
+        <h2 class="section-title">✨ Новинки месяца</h2>
+
+        <div class="row">
+
+            @foreach (var e in Model.NewEvents)
+
+            {
+
+                <div class="col-md-4 mb-3">
+
+                    <partial name="_EventCard" model="e" />
+
+                </div>
+
+            }
+
+        </div>
+
+    }
+
+}
+
+
+
+<div class="row mt-4">
+
+    <div class="col-md-4">
+
+        <div class="stat-card">
+
+            <div class="stat-value">24/7</div>
+
+            <div class="stat-label">Круглосуточный приём ставок</div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="stat-card">
+
+            <div class="stat-value">@(Model.ShowRoulette ? "🎡" : Model.ShowEmptyLineRefresh ? "—" : "Live")</div>
+
+            <div class="stat-label">@(Model.ShowRoulette ? "Игровые автоматы активны" : Model.ShowEmptyLineRefresh ? "Линия обновляется" : "Актуальные коэффициенты")</div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="stat-card">
+
+            <div class="stat-value">100%</div>
+
+            <div class="stat-label">Прозрачные расчёты</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+@if (Model.ShowRoulette)
+
+{
+
+    @section Scripts {
+
+        <script src="~/js/casino-balance.js" asp-append-version="true"></script>
+        <script src="~/js/crazytime.js" asp-append-version="true"></script>
+        <script src="~/js/plinko-wildwest.js" asp-append-version="true"></script>
+        <script src="~/js/zeus-hades.js" asp-append-version="true"></script>
+        <script src="~/js/camelot-gold.js" asp-append-version="true"></script>
+        <script src="~/js/fruitland-1000.js" asp-append-version="true"></script>
+
+    }
+
+}
+
+

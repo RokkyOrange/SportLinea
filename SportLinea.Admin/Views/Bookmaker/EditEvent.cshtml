@@ -1,0 +1,35 @@
+@model EditEventViewModel
+@{
+    ViewData["Title"] = "Редактирование события";
+}
+
+<h1 class="page-title">Редактирование события</h1>
+
+@if (Model.HasBets)
+{
+    <div class="alert alert-danger">По этому событию уже есть ставки — редактирование ограничено.</div>
+}
+
+<div class="card-panel">
+    <form asp-action="EditEvent" method="post">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="text-validation mb-3"></div>
+        <div class="mb-3">
+            <label asp-for="SportType" class="form-label"></label>
+            <input asp-for="SportType" class="form-control" readonly="@Model.HasBets" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" readonly="@Model.HasBets" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label"></label>
+            <input asp-for="StartDate" class="form-control" type="datetime-local" readonly="@Model.HasBets" />
+        </div>
+        @if (!Model.HasBets)
+        {
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        }
+        <a asp-action="Events" class="btn btn-outline-light">Назад</a>
+    </form>
+</div>
